@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 void main() {
   runApp(const TicTacToeApp());
@@ -15,13 +16,109 @@ class TicTacToeApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const TicTacToeGame(),
+      home: const GameModeSelection(),
+    );
+  }
+}
+
+class GameModeSelection extends StatelessWidget {
+  const GameModeSelection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('3目並べ'),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.blue.shade100],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'ゲームモードを選択',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 50),
+              _buildModeButton(
+                context,
+                '人 vs 人',
+                Icons.people,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TicTacToeGame(isVsComputer: false),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildModeButton(
+                context,
+                '人 vs コンピュータ',
+                Icons.computer,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TicTacToeGame(isVsComputer: true),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeButton(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+        minimumSize: const Size(250, 80),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 30),
+          const SizedBox(width: 15),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class TicTacToeGame extends StatefulWidget {
-  const TicTacToeGame({super.key});
+  const TicTacToeGame({super.key, required this.isVsComputer});
+
+  final bool isVsComputer;
 
   @override
   State<TicTacToeGame> createState() => _TicTacToeGameState();
@@ -47,6 +144,79 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
         gameOver = true;
       }
     });
+
+    // コンピュータのターン
+    if (widget.isVsComputer && !gameOver && !isXTurn) {
+      _makeComputerMove();
+    }
+  }
+
+  void _makeComputerMove() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (gameOver) return;
+
+      int bestMove = _getBestMove();
+      setState(() {
+        board[bestMove] = 'O';
+        isXTurn = true;
+        winner = _checkWinner();
+        if (winner != '') {
+          gameOver = true;
+        } else if (!board.contains('')) {
+          winner = '引き分け';
+          gameOver = true;
+        }
+      });
+    });
+  }
+
+  int _getBestMove() {
+    int bestScore = -1000;
+    int bestMove = 0;
+
+    for (int i = 0; i < 9; i++) {
+      if (board[i] == '') {
+        board[i] = 'O';
+        int score = _minimax(board, 0, false);
+        board[i] = '';
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = i;
+        }
+      }
+    }
+    return bestMove;
+  }
+
+  int _minimax(List<String> board, int depth, bool isMaximizing) {
+    String result = _checkWinner();
+    if (result == 'O') return 10 - depth;
+    if (result == 'X') return depth - 10;
+    if (!board.contains('')) return 0;
+
+    if (isMaximizing) {
+      int bestScore = -1000;
+      for (int i = 0; i < 9; i++) {
+        if (board[i] == '') {
+          board[i] = 'O';
+          int score = _minimax(board, depth + 1, false);
+          board[i] = '';
+          bestScore = max(score, bestScore);
+        }
+      }
+      return bestScore;
+    } else {
+      int bestScore = 1000;
+      for (int i = 0; i < 9; i++) {
+        if (board[i] == '') {
+          board[i] = 'X';
+          int score = _minimax(board, depth + 1, true);
+          board[i] = '';
+          bestScore = min(score, bestScore);
+        }
+      }
+      return bestScore;
+    }
   }
 
   String _checkWinner() {
@@ -103,7 +273,9 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                   Text(
                     gameOver
                         ? (winner == '引き分け' ? '引き分け!' : '$winner の勝ち!')
-                        : '${isXTurn ? 'X' : 'O'} の番',
+                        : widget.isVsComputer
+                            ? (isXTurn ? 'あなたの番 (X)' : 'コンピュータの番 (O)')
+                            : '${isXTurn ? 'X' : 'O'} の番',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -128,7 +300,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -145,7 +317,9 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                     itemCount: 9,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onTap: () => _makeMove(index),
+                        onTap: widget.isVsComputer && !isXTurn
+                            ? null
+                            : () => _makeMove(index),
                         child: Container(
                           decoration: BoxDecoration(
                             color: board[index] != ''
