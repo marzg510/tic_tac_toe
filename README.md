@@ -13,6 +13,11 @@ flutter run -d web-server --web-port 3000
 
 flutter create tic_tac_toe_app
 
+### Test with Real Devices
+
+- 開発者モードへは、ビルド番号7回タップで移行できる
+- USBデバッグモードをONにする
+
 ### Building Environment
 
 #### Web Only(VS Code etc)
