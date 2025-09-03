@@ -121,3 +121,4 @@ app.*.symbols
 # Local Files
 memo.txt
 my_app/
+.idea/

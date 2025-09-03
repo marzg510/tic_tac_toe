@@ -1,6 +1,6 @@
 # tic_tac_toe
 
-Tic Tac Toe build by Flutter
+Tic Tac Toe built by Flutter
 
 ## Dev
 
