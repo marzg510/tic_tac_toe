@@ -34,6 +34,7 @@ Constructing...
 ###### Install Flutter Extention
 
 - [VS Code拡張機能](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter)
+- [初めてのFlutterアプリ](https://codelabs.developers.google.com/codelabs/flutter-codelab-first?hl=ja#0)
 
 ##### Install Android Studio
 
