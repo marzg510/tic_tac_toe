@@ -18,6 +18,12 @@ flutter create tic_tac_toe_app
 - 開発者モードへは、ビルド番号7回タップで移行できる
 - USBデバッグモードをONにする
 
+### リリースビルド
+
+```shell
+flutter build appbundle
+```
+
 ### Building Environment
 
 #### Web Only(VS Code etc)
@@ -49,3 +55,13 @@ Constructing...
 ##### Create Virtual Device
 
 ##### Androidライセンスに同意する
+
+
+#### 署名
+
+``` PowerShell
+&"D:\Program Files\Android\Android Studio\jbr\bin\keytool" `
+  -genkey -v -keystore .\upload-keystore.jks `
+  -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 `
+  -alias upload
+```
