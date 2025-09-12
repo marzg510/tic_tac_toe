@@ -24,6 +24,18 @@ flutter create tic_tac_toe_app
 flutter build appbundle
 ```
 
+```shell
+flutter build appbundle --no-shrink
+```
+
+出力先
+[project]/build/app/outputs/bundle/release/app.aab
+
+```shell
+flutter clean
+```
+
+
 ### Building Environment
 
 #### Web Only(VS Code etc)
